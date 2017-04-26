@@ -1,17 +1,28 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { reduxForm } from 'redux-form';
+import { Link } from 'react-router';
 
 import { createPost } from '../actions/index'
 
 class PostsNew extends Component {
+  
+  static contextTypes = { // avoid using context except for react router
+    router: PropTypes.object
+  }
+  
+  onSubmit(props) { // props from the form, not this.props
+    this.props.createPost(props)
+      .then(() => { 
+        this.context.router.push('/');
+       });
+  }
+  
   render() {
-    
+  
     const { fields: { title, categories, content }, handleSubmit } = this.props;
     
-    console.log(title)
-    
     return (
-      <form onSubmit={handleSubmit(this.props.createPost)}>
+      <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
         <h3>Create a New Post</h3>
         <div className={`form-group ${title.touched && title.invalid ? 'has-danger' : ''}`}>
           <label>Title</label>
@@ -34,7 +45,10 @@ class PostsNew extends Component {
             {content.touched ? content.error : '' }
           </div>
         </div>
-        <button type='submit'>Save</button>
+        <button type='submit' className='btn btn-primary'>Save</button>
+        <Link to='/' className='btn btn-danger'>
+          Cancel
+        </Link>
       </form>
     );
   }
@@ -51,7 +65,7 @@ function validate(values) {
     errors.categories = 'Enter categories'
   }
   
-  if(!values.cont) {
+  if(!values.content) {
     errors.content = 'Enter some content'
   }  
   
